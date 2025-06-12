@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  username       String   @unique @db.VarChar(30)
+  email          String   @unique @db.VarChar(255)
+  password       String   @db.VarChar(100)
+  isLocked       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  profilePicture String?
+
+  // relations
+  songs Song[]
+}
+
+model Chord {
+  id           String   @id @default(uuid())
+  name         String   @unique @db.VarChar(255)
+  noteELow     Int?
+  noteA        Int?
+  noteD        Int?
+  noteG        Int?
+  noteB        Int?
+  noteEHigh    Int?
+  sound        String?
+  category     String?
+  startingFret Int      @default(0)
+  tuning       String   @default("standard") @db.VarChar(50)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  strummingPatterns StrummingPatternDetail[]
+
+  // relations
+  songs   Song[]   @relation("SongChords")
+  folders Folder[] @relation("FolderChords")
+}
+
+model StrummingPatternDetail {
+  id      String @id @default(uuid())
+  songId  String
+  order   Int
+  beat    Float
+  stroke  String
+  chordId String
+
+  song  Song  @relation(fields: [songId], references: [id])
+  chord Chord @relation(fields: [chordId], references: [id])
+}
+
+model Song {
+  id                     String                   @id @default(uuid())
+  userId                 String
+  title                  String                   @db.VarChar(50)
+  artist                 String                   @db.VarChar(100)
+  isPublic               Boolean                  @default(false)
+  tuning                 String                   @default("standard") @db.VarChar(50)
+  strummingPattern       String                   @db.VarChar(50)
+  strummingPatternDetail StrummingPatternDetail[]
+  updatedAt              DateTime                 @updatedAt
+
+  // relations
+  user    User     @relation(fields: [userId], references: [id])
+  chords  Chord[]  @relation("SongChords")
+  folders Folder[] @relation("FolderSongs")
+}
+
+model Folder {
+  id             String   @id @default(uuid())
+  name           String   @db.VarChar(30)
+  hasChildren    Boolean  @default(false)
+  parentFolderId String?
+  depthLevel     Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  //relations
+  parentFolder Folder?  @relation("FolderParent", fields: [parentFolderId], references: [id])
+  children     Folder[] @relation("FolderParent")
+
+  chords Chord[] @relation("FolderChords")
+  songs  Song[]  @relation("FolderSongs")
+
+  @@index([parentFolderId])
+}
