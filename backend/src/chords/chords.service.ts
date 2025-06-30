@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Chord } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
-import { ApiResponse } from '../types';
-import { CreateChordDto } from 'src/dto/create-chords.dto';
+import { CreateChordDto } from 'src/chords/DTOs/create-chords.dto';
+import { PostApiResponse } from 'src/types';
 
 @Injectable()
 export class ChordsService {
@@ -12,7 +12,7 @@ export class ChordsService {
     return this.prisma.chord.findMany();
   }
 
-  async createChord(chordData: CreateChordDto): Promise<ApiResponse> {
+  async createChord(chordData: CreateChordDto): Promise<PostApiResponse> {
     try {
       const chordNameExists = await this.prisma.chord.findFirst({
         where: {

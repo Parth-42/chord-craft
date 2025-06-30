@@ -1,21 +1,19 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { Chord } from '@prisma/client';
-import { CreateChordDto } from 'src/dto/create-chords.dto';
-import { ChordsService } from 'src/services/chords.service';
+import { CreateChordDto } from 'src/chords/DTOs/create-chords.dto';
+import { ChordsService } from 'src/chords/chords.service';
 
 @Controller('chords')
 export class ChordsController {
   constructor(private readonly chordsService: ChordsService) {}
 
   @Get()
-  async getAllChords(): Promise<Chord[]> {
-    const data = await this.chordsService.getAllChords();
-
-    return data;
+  getAllChords(): Promise<Chord[]> {
+    return this.chordsService.getAllChords();
   }
 
   @Post('/create')
-  async createChord(@Body() chordDto: CreateChordDto) {
+  createChord(@Body() chordDto: CreateChordDto) {
     return this.chordsService.createChord(chordDto);
   }
 }
